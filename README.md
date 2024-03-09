@@ -7,3 +7,100 @@
 对sql数据重复异常的处理，在handler中构建处理函数，捕获该异常并返回相应信息；
 当前添加员工的id问题，由jwt解析生成id，使用threadlocal的组件类保存该id，然后由业务层获取
 //TODO 密码校验需要MD5加密处理
+
+
+## DAY 2
+## 员工分页查询实现
+在员工管理页面需要查询到当前员工表，前端将员工姓名、页码、页面条数推送给后端，后端接受后返回json数据给前端，其中data字段包括总条数total，及查询到的页面记录records
+前端页面：![QQ截图20240309214132](https://github.com/p0t4tt0/-/assets/147514081/fbceecda-1f8e-487c-9a13-ced7adecab12)
+
+### 具体实现：
+表现层：
+```
+@GetMapping("/page")
+@ApiOperation(value = "员工分页查询")
+    public Result<PageResult> page(EmployeePageQueryDTO employeePageQueryDTO)
+    {
+        log.info("员工分页查询："+employeePageQueryDTO);
+        PageResult pageResult= employeeService.pageQuery(employeePageQueryDTO);
+
+
+        return Result.success(pageResult);
+    }
+```
+业务层：
+```
+/**
+     * 分页查询
+     * @param employeePageQueryDTO
+     * @return
+     */
+    PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+```
+业务层实现：
+
+```
+ /**
+     * 分页查询
+     * @return
+     */
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO)
+{
+    //使用pagehelper插件简化分页查询,动态拼接sql,底层使用了threadlocal，存入页码值，动态拼接limit关键字用于分页查询
+    PageHelper.startPage(employeePageQueryDTO.getPage(),employeePageQueryDTO.getPageSize());
+
+    //page对象为数组
+    Page<Employee> page=employeeMapper.pageQuery(employeePageQueryDTO);
+
+    Long total=page.getTotal();
+    List<Employee> records=page.getResult();
+    return new PageResult(total,records);
+}
+```
+
+mapper层：
+```
+/**
+     * 分页查询--动态查询，通过xml映射文件
+     * @param employeePageQueryDTO
+     * @return
+     */
+    Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+```
+xml映射文件：
+```
+<mapper namespace="com.sky.mapper.EmployeeMapper">
+<select id="pageQuery" resultType="com.sky.entity.Employee">
+    select  * from employee
+  <where>
+    <if test="name!=null and name!=''">
+        and name like concat('%',#{name},'%')
+    </if>
+
+  </where>
+      order by create_time desc
+</select>
+</mapper>
+```
+#### 需要注意的是后端返回的data数据中，localtime格式的数据为数组形式，显示到前端是一串数字，不符合时间格式，需要进行处理，两种方式：
+一、在实体类属性前加注解（需要挨个加，比较繁琐）
+二、在配置类中添加消息转换器，统一将后端返回的数据转为json格式（推荐）
+```
+/**
+     * 扩展spring mvc框架的 消息转换器，对后端传送的数据统一进行转换处理
+     * @param converters
+     */
+    @Override
+    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        log.info("扩展消息转换器....");
+        //创建消息转换器对象
+        MappingJackson2HttpMessageConverter messageConverter=new MappingJackson2HttpMessageConverter();
+        //为消息转换器设置一个对象转化器，将java对象转换为jason数据
+        messageConverter.setObjectMapper(new JacksonObjectMapper());
+        //将自定义转换器添加进spring框架的转换器容器，并设置序号为0，优先使用
+        converters.add(0,messageConverter);
+    }
+```
+
+
+
