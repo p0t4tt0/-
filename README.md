@@ -101,6 +101,88 @@ xml映射文件：
         converters.add(0,messageConverter);
     }
 ```
+## DAY3
+## 1.启用禁用员工实现
 
+前端在员工列表中点击某员工的启用/禁用按钮，通过地址栏传参，将员工的status属性修改为0或1，其中员工id为query查询参数
+
+后端接受参数post请求后，调用update修改员工属性status，返回前端成功消息
+
+### 具体实现
+
+controller：
+
+```
+ /**
+     * 员工启用、禁用；
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation(value = "启用禁用员工账号")
+
+    public Result startOrStop(@PathVariable Integer status,Long id)
+    {
+        log.info("启用禁用员工账号参数：{}，{}",status,id);
+        employeeService.startOrStop(status,id);
+        return  Result.success();
+    }
+```
+
+service:
+```
+/**
+     * 员工启用禁用
+     * @param status
+     * @param id
+     */
+
+    void startOrStop(Integer status, Long id);
+```
+serviceImpl:
+```
+/**
+     * 员工启用禁用
+     * @param status
+     * @param id
+     */
+    public void startOrStop(Integer status, Long id) {
+
+        //update 动态传参
+        Employee employee=new Employee();
+        employee.setStatus(status);
+        employee.setId(id);
+        employeeMapper.update(employee);
+
+    }
+```
+
+mapper: 为便于以后更新员工数据，这里定义了一个统一的update方法，用于动态更新员工属性值
+
+```
+/**
+     * 动态更新员工属性
+     * @param employee
+     */
+    void update(Employee employee);
+```
+xml:
+```
+    <update id="update" parameterType="Employee">
+update employee
+<set>
+    <if test="name != null">name=#{name},</if>
+    <if test=" username != null ">username=#{username},</if>
+    <if test=" password != null ">password=#{password},</if>
+    <if test=" phone != null ">phone=#{phone},</if>
+    <if test=" sex != null ">sex =#{sex},</if>
+    <if test=" idNumber != null ">id_Number=#{idNumber},</if>
+    <if test=" updateTime != null ">update_Time=#{updateTime},</if>
+    <if test=" updateUser!= null ">update_User=#{updateUser},</if>
+    <if test=" status != null ">status=#{status},</if>
+</set>
+    <where>id = #{id}</where>
+
+    </update>
+```
 
 
