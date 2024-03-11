@@ -10,6 +10,7 @@ import com.sky.service.SetMealService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +51,17 @@ public class SetMealController {
         return Result.success(pageResult);
 
     }
+
+@DeleteMapping
+@ApiOperation("套餐批量删除")
+public Result delete(@RequestParam List<Long> ids)
+{
+
+    log.info("套餐批量删除 ：{}",ids);
+    setMealService.deleteBatch(ids);
+    return Result.success();
+
+}
 
 
 }
