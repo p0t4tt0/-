@@ -7,6 +7,12 @@ sky:
     username: root
     password: 123456
 
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    database: 1
+
   alioss:
     bucket-name: p0tt4t0
     access-key-secret: J6bJ7e6rJyr1RWhuh7B1VUIVBhS5ZT
