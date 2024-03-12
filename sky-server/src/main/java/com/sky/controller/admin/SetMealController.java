@@ -98,4 +98,13 @@ public Result<SetmealVO> getById(@PathVariable Long id)
 }
 
 
+   @PostMapping("/status/{status}")
+   public Result startOrStop(@PathVariable Integer status,Long id)
+   {
+       log.info("起售停售套餐参数 ：{} {}",status,id);
+       setMealService.startOrStop(status,id);
+       return Result.success();
+   }
+
+
 }
