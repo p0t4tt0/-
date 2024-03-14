@@ -18,3 +18,6 @@ sky:
     access-key-secret: J6bJ7e6rJyr1RWhuh7B1VUIVBhS5ZT
     endpoint: oss-cn-beijing.aliyuncs.com
     access-key-id: LTAI5tDPFowpWjBB5naTzFWb
+  wechat:
+    appid: wxc49254745e30432f
+    secret: 006526f7dcd968d898fd4be27495cb76
