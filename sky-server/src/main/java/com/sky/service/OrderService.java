@@ -80,4 +80,11 @@ public interface OrderService {
      * @param id
      */
     void complete(Long id);
+
+    /**
+     * 用户历史订单
+     * @param
+     * @return
+     */
+    PageResult userPageQuery(int page,int pageSize,Integer status);
 }

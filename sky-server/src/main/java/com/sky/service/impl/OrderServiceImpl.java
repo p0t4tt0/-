@@ -355,4 +355,36 @@ List<OrderDetail> orderDetailList=new ArrayList<>();
         orderMapper.update(orders);
 
     }
+
+
+    /**
+     * 用户历史订单
+     * @param
+     * @return
+     */
+    public PageResult userPageQuery(int page,int pageSize,Integer status) {
+        PageHelper.startPage(page,pageSize);
+        Long userId=BaseContext.getCurrentId();
+        OrdersPageQueryDTO ordersPageQueryDTO=new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setUserId(userId);
+
+            ordersPageQueryDTO.setStatus(status);
+
+        Page<Orders> ordersPage=orderMapper.pageQuery(ordersPageQueryDTO);
+
+        List<OrderVO> orderVOS=new ArrayList<>();
+        if(ordersPage.getTotal()>0&&ordersPage!=null) {
+            for (Orders orders: ordersPage)
+            {
+                OrderVO orderVO=new OrderVO();
+                BeanUtils.copyProperties(orders,orderVO);
+                Long id=orders.getId();
+                List<OrderDetail> orderDetailList=orderDetailMapper.getById(id);
+                orderVO.setOrderDetailList(orderDetailList);
+
+                orderVOS.add(orderVO);
+            }
+        }
+        return new PageResult(ordersPage.getTotal(),orderVOS);
+    }
 }
