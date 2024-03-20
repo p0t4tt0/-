@@ -1,7 +1,9 @@
 package com.sky.handler;
 
 import com.sky.constant.MessageConstant;
+import com.sky.entity.Orders;
 import com.sky.exception.BaseException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -47,6 +49,19 @@ public class GlobalExceptionHandler {
         }
 
 
+    }
+
+    @ExceptionHandler
+    public Result exHandler(OrderBusinessException e)
+    {
+        String s=e.getMessage();
+        if (s.contains("超出配送范围"))
+        {
+            return Result.error("超出配送范围");
+        }
+        else {
+            return Result.error(MessageConstant.UNKNOWN_ERROR);
+        }
     }
 
 }
