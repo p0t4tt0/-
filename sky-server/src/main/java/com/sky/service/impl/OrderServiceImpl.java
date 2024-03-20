@@ -387,4 +387,64 @@ List<OrderDetail> orderDetailList=new ArrayList<>();
         }
         return new PageResult(ordersPage.getTotal(),orderVOS);
     }
+
+
+    /**
+     * 用户订单取消
+     * @param id
+     */
+    public void cancelById(Long id) {
+        Orders orders=orderMapper.getById(id);
+
+        if(orders==null)
+        {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        if(orders.getStatus()>2)
+        {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+
+        Orders orders1=new Orders();
+        orders1.setId(id);
+        if(orders.getStatus().equals(Orders.TO_BE_CONFIRMED))
+        {
+            //退款
+        }
+
+        orders1.setStatus(Orders.CANCELLED);
+        orders1.setCancelTime(LocalDateTime.now());
+        orders1.setCancelReason("用户取消");
+        orderMapper.update(orders1);
+
+    }
+
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    public void repetition(Long id) {
+
+        List<OrderDetail> orderDetailList=orderDetailMapper.getById(id);
+
+        List<ShoppingCart> shoppingCarts=new ArrayList<>();
+        Long userId=BaseContext.getCurrentId();
+
+        for (OrderDetail od:orderDetailList)
+        {
+            ShoppingCart shoppingCart=new ShoppingCart();
+            BeanUtils.copyProperties(od,shoppingCart);
+
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+
+            shoppingCarts.add(shoppingCart);
+        }
+
+        shoppingCartMapper.insertBatch(shoppingCarts);
+
+    }
 }

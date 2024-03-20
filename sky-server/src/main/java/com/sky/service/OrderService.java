@@ -87,4 +87,16 @@ public interface OrderService {
      * @return
      */
     PageResult userPageQuery(int page,int pageSize,Integer status);
+
+    /**
+     * 用户取消订单
+     * @param id
+     */
+    void cancelById(Long id);
+
+    /**
+     * 用户再来一单
+     * @param id
+     */
+    void repetition(Long id);
 }
